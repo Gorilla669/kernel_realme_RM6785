@@ -6,24 +6,24 @@ function compile()
 source ~/.bashrc && source ~/.profile
 export LC_ALL=C && export USE_CCACHE=1
 ccache -M 100G
+git clone --depth=1 https://github.com/StatiXOS/android_prebuilts_gcc_linux-x86_arm_arm-eabi gcc
+git clone --depth=1 https://github.com/StatiXOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-elf gcc64
 export ARCH=arm64
 export KBUILD_BUILD_HOST=Anupam_Roy
 export KBUILD_BUILD_USER="Gorilla669"
-git clone --depth=1 https://github.com/Kdrag0n/proton-clang.git clang
 
 [ -d "out" ] && rm -rf AnyKernel && rm -rf out || mkdir -p out
 
 make O=out ARCH=arm64 RM6785_defconfig
 
-PATH="${PWD}/clang/bin:${PATH}:${PWD}/clang/bin:${PATH}:${PWD}/clang/bin:${PATH}" \
+PATH="${PWD}/gcc/bin:${PATH}:${PWD}/gcc64/bin:/usr/bin:$PATH" \
 make -j$(nproc --all) O=out \
-                      ARCH=arm64 \
-                      CC="clang" \
-                      LD=ld.lld \
-                      CLANG_TRIPLE=aarch64-linux-gnu- \
-                      CROSS_COMPILE="${PWD}/clang/bin/aarch64-linux-gnu-" \
-                      CROSS_COMPILE_ARM32="${PWD}/clang/bin/arm-linux-gnueabi-" \
-                      CONFIG_NO_ERROR_ON_MISMATCH=y
+			CROSS_COMPILE_ARM32=arm-eabi- \
+			CROSS_COMPILE=aarch64-elf- \
+			LD=aarch64-elf-ld.lld \
+			CC=aarch64-elf-gcc \
+			STRIP=llvm-strip \
+			CONFIG_DEBUG_SECTION_MISMATCH=y
 }
 
 function zupload()
